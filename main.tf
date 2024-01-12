@@ -1,17 +1,18 @@
-# Setting up VPC
-//network.tf
+// network.tf
 resource "aws_vpc" "blueteam" {
-  cidr_block = "10.0.0.0/24"
+  cidr_block          = "10.0.0.0/16"  # Adjust the CIDR block size
   enable_dns_hostnames = true
-  enable_dns_support = true
-  }
-# Setting up the subnets
-//subnets.tf
+  enable_dns_support   = true
+}
+
+// subnets.tf
 resource "aws_subnet" "subnet-uno" {
-  cidr_block = "${cidrsubnet(aws_vpc.blueteam.cidr_block, 3, 1)}"
-  vpc_id = "${aws_vpc.blueteam.id}"
+  cidr_block       = cidrsubnet(aws_vpc.blueteam.cidr_block, 4, 1)  # Adjust the CIDR block size
+  vpc_id           = aws_vpc.blueteam.id
   availability_zone = "us-east-1a"
-}resource "aws_key_pair" "autodeploy" {
+}
+
+resource "aws_key_pair" "autodeploy" {
   public_key = file("/var/jenkins_home/.ssh/id_rsa.pub")
 }
 
@@ -35,5 +36,6 @@ resource "aws_instance" "public_instance" {
   }
 
   tags = {
-    Name = var.name_tag,
+    Name = var.name_tag
   }
+}
