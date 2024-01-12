@@ -7,19 +7,21 @@ resource "aws_instance" "public_instance" {
   instance_type = var.instance_type
   key_name      = aws_key_pair.autodeploy.key_name
   
-  // Other instance configurations...
-
-  // Attach the primary EBS volume (default size)
-  root_block_device {
-    volume_size = 8  # Adjust the size based on your needs
+  # Create New Volume
+resource "aws_ebs_volume" "add_disk" {
+ availability_zone = aws_instance.public_instance.availability_zone
+ size = 10
+ tags = {
+   Name = "New Disk"
   }
+}
 
-  // Attach an additional EBS volume (2 GB)
-  ebs_block_device {
-    device_name = "/dev/sdb"
-    volume_size = 2
-    volume_type = "gp2"  # Adjust volume type as needed
-  }
+# Add Disk to Ubuntu Instance
+resource "aws_volume_attachment" "ebs" {
+  device_name = "/dev/sdb"
+  volume_id = aws_ebs_volume.add_disk.id
+  instance_id = aws_instance.public_instance.id
+}
 
   tags = {
     Name = var.name_tag
